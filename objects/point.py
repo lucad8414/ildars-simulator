@@ -80,4 +80,5 @@ class Point:
         :param name: label of the point, will be displayed with plt.legend()
         :type name: str
         """
-        plt.scatter(self.value[0], self.value[1], s=100, color = color, label=name)
+        plt.scatter(self.value[0], self.value[1], s=30, color = color, label=name)
+        plt.text(self.value[0], self.value[1], name, size=8, color="green")

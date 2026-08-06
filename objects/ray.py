@@ -16,6 +16,7 @@ class Ray:
         self.expanded = False
         self.order = order
         self.recieved = False # Flag to mark, if we recieved the ray, meaning we dont want to continue anymore.
+        self.logger = []
 
     # ------------------------------------------------------------------------
 
@@ -33,6 +34,7 @@ class Ray:
         :return: Returns and saves a list of the vectors, which are reflection from the starting point.
         :rtype: list[Vector]
         """
+    
         # If this ray already got expanded, just return the saved one, because environment is static.
         if self.expanded:
             return self.values
@@ -42,6 +44,7 @@ class Ray:
         block = -1 # flag for blocking reflection of the same wall twice in a row.
         self.value = self.value.extend() # we want a line, to perform point intersection in the first iteration.
         
+       
 
         # repeating the process for each order of reflection.
         for o in range(0, self.order + 1):
@@ -92,6 +95,7 @@ class Ray:
             # take the closest legal intersecton
             m = dist.index(min(dist))
             block = m
+            self.logger.append(m + 1)
             
             # adjust the respective line.
             if self.recieved:
@@ -141,7 +145,7 @@ class Ray:
     
     # ------------------------------------------------------------------------
 
-    def pov(self, reciever: tuple[Point, float], color: str = "orange", name: str = ""):
+    def pov(self, reciever: tuple[Point, float], color: str = "orange", name: str = "", labelling: bool = True) -> tuple[Vector, str]:
         """
         Plotting every Point, where the reciever sees it, just using the incoming direction
         and the entire length of the ray for the plot.
@@ -172,5 +176,17 @@ class Ray:
         # scaled
         pov = npov.scalar(distance + rad)
 
-        pov.end.plot(color, name)
+        # adding the label:
+        
+        if labelling:
+            label = "I"
+            for reflection in self.logger:
+                label += str(reflection)
+            label = label[:len(label) - 1]
+        
+        pov.end.plot(color, label)
+        
+        
+        return (pov, label)
+
 

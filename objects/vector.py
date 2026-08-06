@@ -16,6 +16,11 @@ class Vector:
         self.value = tmp.value # the actual distance.
     
     # ------------------------------------------------------------------------
+    
+
+
+
+    # ------------------------------------------------------------------------
 
     def __abs__(self) -> float:
         """
@@ -44,6 +49,11 @@ class Vector:
         res += str(self.value[-1])
         return f"{{{res}}}"
     
+
+    def __repr__(self):
+        return str(self)
+
+
     # ------------------------------------------------------------------------
 
     def scalar(self, scalar: float) -> "Vector":

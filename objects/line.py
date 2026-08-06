@@ -176,7 +176,10 @@ class Line:
 
             # check if actually perpendicular.
             assert self.angle(v2) == 0.5 * math.pi
-            if show:
+            # TOGGLE !!!!
+            # 
+            # 
+            if False:
                 p.plot("black", "anchor")
                 inter2.plot("grey","inter point")
                 l2.plot("green", "perp line")
@@ -185,7 +188,7 @@ class Line:
 
             # check if actually perpendicular.
             assert self.angle(v1) == 0.5 * math.pi
-            if show:
+            if False:
                 p.plot("black", "anchor")
                 inter1.plot("grey","inter point")
                 l1.plot("green", "perp line")
@@ -211,7 +214,7 @@ class Line:
         """
         # Compute the perpendicular Point on the wall (self)
         p = self.perp_point(start, show)
-        
+
         # get the direction vector between the source and the perpendicular point p.
         n = Vector(start, p)
 
@@ -233,7 +236,13 @@ class Line:
 
 
         direction = Vector(anchor, intersection)
-        if show:  
+        
+        # TOGGLE !!!!
+        #
+        #
+        #
+
+        if False:  
             Line(anchor, direction).plot("orange", "Image")
             colors = ["red", "green", "pink", "grey", "orange", "blue", "black", "yellow"]
             anchor.plot(colors[order], "image")
@@ -265,8 +274,8 @@ class Line:
         :param name: label to be displayed.
         :type name: str
         """
-        a = self.point(-15 * (1/ abs(self.direction)))
-        b = self.point(25 * (1/ abs(self.direction)))
+        a = self.point(-20 * (1/ abs(self.direction)))
+        b = self.point(30 * (1/ abs(self.direction)))
         plt.plot([a.value[0], b.value[0]], [a.value[1], b.value[1]], color=color, label=name)
 
     # ------------------------------------------------------------------------
