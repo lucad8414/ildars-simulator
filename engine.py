@@ -2,6 +2,7 @@ from objects.ray import Ray
 from objects.line import Line
 from objects.vector import Vector
 from objects.point import Point
+import objects.dataset as sets
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -9,7 +10,8 @@ import objects.analytics as analysis
 import math
 
 
-ROUNDS = 20000 # Important HYPERPARAMETER, amount of Signals, which are send.
+
+ROUNDS = 20003 # Important HYPERPARAMETER, amount of Signals, which are send.
 
 
 class Engine:
@@ -42,9 +44,9 @@ class Engine:
         print(beta)
 
         # generate random starting point and line
-        base = Line(Point([-5., -10.]), Vector(Point([0.,0.]), Point([15, -6.0]))) # 1
-        right = Line(Point([10.,15.]), Vector(Point([0.,0.]), Point([25, -30]))) # 2
-        left = Line(Point([-12., 0.]), Vector(Point([0.,0.]), Point([3.4, 10.0]))) # 3
+        base = Line(Point([-7.122, -16.432]), Vector(Point([0.,0.]), Point([20.891, -2.432]))) # 1
+        right = Line(Point([10.,15.]), Vector(Point([0.,0.]), Point([25.879, -41.891]))) # 2
+        left = Line(Point([-23.758, 0.453]), Vector(Point([0.,0.]), Point([4.499, 9.175]))) # 3
         additional = Line(Point([17.,-1.]), Vector(Point([0.,0.]), Point([0., 10.])))
         self.walls = [base,right,left]
         # generate another line from the anfgular range to l1
@@ -62,7 +64,7 @@ class Engine:
         while flag:
             flag = False
         
-        self.sender = Point([10., 2.])
+        self.sender = Point([-3.123, 19.543])
         # think of some bounds: how far from each other? how far from each wall at least?
 
 
@@ -181,8 +183,8 @@ if __name__ == "__main__":
     e.generate()
     e.sound_events(reflection_order, True) # orders of reflection, which are allowed.
     e.create_edm()
-    print("Unfiltered EDM", e.edm)
-    print("Image points captured with (Position, Label): \n", e.images)
+    # print("Unfiltered EDM", e.edm)
+    # print("Image points captured with (Position, Label): \n", e.images)
     line = ""
     for row in e.edm:
         line += "["
@@ -192,24 +194,40 @@ if __name__ == "__main__":
             else:
                 line += el +", "
         line += "]\n"
-    print("Rounded and formatted data", line)
+    # print("Rounded and formatted data", line)
 
     e.compare_point_pair_distances(1)
-    print("Unfilted distance pairs", e.distance_pairs)
-    print()
+    # print("Unfilted distance pairs", e.distance_pairs)
+    # print()
     filtered_data = {}
     for key, value in e.distance_pairs.items():
         if len(value) > 1:
             filtered_data[key] = value
 
+    print("Macros:", ROUNDS, e.radius)
     print("Filtered data", filtered_data)
 
-    seperated_data = {}
-    for dist, line in filtered_data.items():
-        G, comp = analysis.analyze_distance_row(line)
-        main, residual, isolated = analysis.evaluate_components(comp)
-        seperated_data[dist] = [main, residual, isolated]
-        print(f"{dist}: Main: {main},\n Residual: {residual},\n Isolated: {isolated}\n")
+    # 2. Packe sie in eine Liste
+    datasets = [sets.data1, sets.data2, sets.data3]
+
+    clear, rest, logs = analysis.split_dictionary_with_flags(datasets[1])
+    # because we know, that the keys match, we just go through the keys of one.
+    maxi = 0
+    for key, value in rest.items():
+        print(clear[key])
+        print(value)
+        print(logs[key])
+        print()
+        if len(clear[key]) > maxi:
+            maxi = len(clear[key])
+
+    print("Max", maxi)
+
+    # 3. Führe den Mehrheitsentscheid aus
+    # echte_muster_d = analysis.find_universal_patterns(datasets)
+
+    # 4. Lass dir die Analyse ausgeben
+    # analysis.analyze_and_print_new_patterns(echte_muster_d)
 
 
     plt.autoscale(False)

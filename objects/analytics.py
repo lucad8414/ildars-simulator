@@ -1,226 +1,105 @@
-import itertools
-import networkx as nx
-
-
-def extract_words(p1: str, p2: str) -> tuple[str, str]:
-        w1 = p1[1:] if p1 != 'I' else ''
-        w2 = p2[1:] if p2 != 'I' else ''
-        return w1, w2
-
-def is_mirrored(p1: tuple[str, str], p2: tuple[str, str]) -> bool:
+def shredded(w: str) -> str:
     """
-    Checks if on pair originates from the other pair beeing mirrored.
     """
-    w1, w2 = p1
-    v1, v2 = p2
-    w = sorted([w1, w2])
-    v = sorted([v1, v2])
+    if w == "": return w
 
-    # check if it is even possible
-    # ratio needs to match, it cant be that both words are the same length
-    if len(w1) - len(w2) == len(v1) - len(v2):
-        if w[1] > v[1]:
-            if w[0] > v[0]:
+    while True:
+        flag = True
+        prev = ""
+        for i, c in enumerate(w):
+            if prev == c:
+                w = w[:i-1] + w[i+1:]
+                flag = False
+                break
+            prev = c
 
-                # If this runs through v[1] is a prefix of w[1]
-                for i in range(len(v[1])):
-                    if w[1][i] != v[1][i]:
-                        return False
+        if flag:
+            break
+    return w
 
-                suffix = w[1][len(v[1]):]
 
-                # If this runs through v[1] is a prefix of w[1]
-                for i in range(len(v[0])):
-                    if w[0][i] != v[0][i]:
-                        return False
-
-                if suffix == w[0][len(v[0]):]:
-                    return True
-                return False
-                
-            else: return False
-
-        if v[1] > w[1]:
-            if v[0] > w[0]:
-                # If this runs through v[1] is a prefix of w[1]
-                for i in range(len(w[1])):
-                    if v[1][i] != w[1][i]:
-                        return False
-
-                suffix = v[1][len(w[1]):]
-
-                # If this runs through v[1] is a prefix of w[1]
-                for i in range(len(w[0])):
-                    if v[0][i] != w[0][i]:
-                        return False
-
-                if suffix == v[0][len(w[0]):]:
-                    return True
-                return False
-            else: return False
-
-        # some have equal distance
-        return False
-
-        
-    else:
-        return False
+def matchings(p1: tuple[str, str], p2: tuple[str, str]) -> bool:
+    """
+    Erkennt, ob p2 aus p1 durch Anfügen derselben Wand an beide Pfade entsteht.
+    Bsp: p1 = ('', '1') und p2 = ('2', '12') -> beide wurden rechts um '2' erweitert (oder links).
+    """
+    Iw1, Iw2 = p1
+    Iv1, Iv2 = p2
     
+    w1 = Iw1[1:]
+    w2 = Iw2[1:]
+    v1 = Iv1[1:]
+    v2 = Iv2[1:]
 
+    s1 = w1[::-1] + v1
+    s2 = w1[::-1] + v2
 
-def check_pattern_between_pairs(p1: tuple[str, str], p2: tuple[str, str]) -> str | None:
-    """
-    Prüft, ob p2 durch Muster A, B oder C aus p1 erklärt werden kann
-    ODER umgekehrt.
-    """
-    w1, w2 = p1
-    v1, v2 = p2
+    if shredded(w2 + s1) == v2:
+        return True
 
-    # Muster A (Präfix/Suffix): p2 aus p1 ODER p1 aus p2
-    if is_mirrored(p1, p2) or is_mirrored(p2, p1):
-        return 'A'
+    if shredded(w2 + s2) == v1:
+        return True
 
-    # Muster B (Inversen-Symmetrie)
-    w1_rev, w2_rev = w1[::-1], w2[::-1]
-    if (v1 == w1_rev and v2 == w2_rev) or (v1 == w2_rev and v2 == w1_rev):
-        return 'B'
-
-    # Muster C (Relativ-Verschiebung)
-    rel1 = tuple(sorted(['', w1[::-1] + w2]))
-    rel2 = tuple(sorted(['', v1[::-1] + v2]))
-    if rel1 == rel2 and rel1 != ('', ''):
-        return 'C'
-
-    return ""
+    return False
 
 
 def split_dictionary_with_flags(data: dict):
 
-    # initialize the output dicts.
-    dict_A = {}
-    dict_B = {}
-    dict_C = {}
-    dict_Rest = {}
+    alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+ 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    clear = {}
+    rest = {}
+    logs = {}
 
-    # go through the data
-    for dist, pairs in data.items():
-        # if there is only one pair with this distance dont bother.
-        # either due to geometry or due to not having high enough order of reflection
-        if len(pairs) <= 1:
-            dict_Rest[dist] = pairs
-            continue
+    for key, value in data.items():
 
-        
-        # word_pairs = [(p1, p2) for p1, p2 in pairs]
-        amount_pairs = len(pairs)
-        flags = [""] * amount_pairs
+        flags = [""] * len(value)
 
-        # 1. Jedes Paar mit jedem vergleichen
-        for i in range(amount_pairs):
-            for j in range(amount_pairs):
+        for i in range(len(value)):
+            for j in range(len(value)):
 
-                # Dont need to compare to itself
-                if i == j:
-                    continue
+                if i == j: continue
 
-                # check for each combination, if the get a pattern, so pattern is not None
-                pattern = check_pattern_between_pairs(pairs[i], pairs[j])
+                matches = matchings(value[i], value[j])
 
+                if matches:
+                    append_for_i = ""
+                    append_for_j = ""
+                    if j > 9:
+                        append_for_i = alphabet[j-10]
+                    else:
+                        append_for_i = str(j)
 
-                flags[i] += pattern
-                flags[j] += pattern
+                    if i > 9:
+                        append_for_j = alphabet[i-10]
+                    else:
+                        append_for_j = str(i)
 
-        filtered_flags = []
-        # Prepair flags
-        for e in flags:
-            new = "".join(dict.fromkeys(e))
-            filtered_flags.append(new)
+                    flags[i] += append_for_i
+                    flags[j] += append_for_j
 
+        clear[key] = []
+        rest[key] = []
 
-        # 2. Aufteilung anhand der Flags
-        list_A, list_B, list_C, list_Rest = [], [], [], []
+        ff = []
+        for flag in flags:
+            ff.append("".join(dict.fromkeys(flag)))
 
-
-        for idx, flag in enumerate(filtered_flags):
-            pair = pairs[idx]
-            if flag == "":
-                list_Rest.append(pair)
+        logs[key] = ff
+        for ind, flag in enumerate(flags):
+            if flag != "":
+                clear[key].append(value[ind])
             else:
-                for s in flag:
-                    if s == 'A':
-                        list_A.append(pair)
-                    elif s == 'B':
-                        list_B.append(pair)
-                    elif s == 'C':
-                        list_C.append(pair)
-                                
+                rest[key].append(value[ind])
 
-        if list_A: dict_A[dist] = list_A
-        if list_B: dict_B[dist] = list_B
-        if list_C: dict_C[dist] = list_C
-        if list_Rest: dict_Rest[dist] = list_Rest
-
-    return dict_A, dict_B, dict_C, dict_Rest
-
-
-
-# Wir gehen davon aus, dass deine Funktionen extract_words und 
-# check_pattern_between_pairs hier verfügbar sind.
-
-def analyze_distance_row(pairs_in_row: list[tuple[str, str]]):
-    """
-    Wandelt eine Liste von Punktpaaren (gleicher Abstand) in einen Graphen um
-    und findet zusammenhängende Muster-Gruppen sowie isolierte Reste.
-    """
-    G = nx.Graph()
     
-    # 1. Alle Knoten hinzufügen
-    # Da Tupel aus Strings in Python hashbar sind, können sie direkt als Knoten dienen.
-    G.add_nodes_from(pairs_in_row)
-    
-    # 2. Kanten ziehen (Jedes Paar mit jedem exakt einmal vergleichen)
-    # itertools.combinations verhindert redundante Vergleiche (i mit j und j mit i)
-    for p1, p2 in itertools.combinations(pairs_in_row, 2):
-        
-        # Wörter extrahieren (deine Hilfsfunktion)
-        w1_tuple = extract_words(*p1)
-        w2_tuple = extract_words(*p2)
-        
-        # Muster prüfen
-        pattern = check_pattern_between_pairs(w1_tuple, w2_tuple)
-        
-        if pattern:
-            # Kante hinzufügen und das gefundene Muster als Attribut speichern
-            G.add_edge(p1, p2, pattern=pattern)
-            
-    # 3. Zusammenhangskomponenten extrahieren
-    # Gibt eine Liste von Sets zurück. Jedes Set ist eine "Insel" im Graphen.
-    components = list(nx.connected_components(G))
-    
-    return G, components
+    return clear, rest, logs
 
-# --- Beispielhafte Auswertung ---
 
-def evaluate_components(components):
-    haupt_gruppen = []
-    rest_gruppen = []
-    isolierte_paare = []
+if __name__ == "__main__":
+    test = [('I2', 'I32121'), ('I32312', 'I1')]
+    for i in range(len(test)):
+        for j in range(len(test)):
+            if i == j: continue
+            print(test[i],test[j], matchings(test[i],test[j]))
     
-    # Sortieren nach Größe (größte Gruppe zuerst), um die "Hauptgruppe" zu finden
-    components_sorted = sorted(components, key=len, reverse=True)
-    
-    for i, comp in enumerate(components_sorted):
-        if len(comp) > 2 and i == 0:
-            # Die größte Gruppe ist meist das Fundament bekannter Muster
-            haupt_gruppen.append(comp)
-        elif len(comp) > 1:
-            # Eine eigene kleine Insel (z.B. 2 Paare), die aber nicht zur Hauptgruppe gehört!
-            # HOCHINTERESSANT: Hier könnte sich ein neues Muster (Muster D) verbergen,
-            # das diese kleine Gruppe in sich selbst verbindet.
-            rest_gruppen.append(comp)
-        else:
-            # Völlig isolierte Knoten (Größe 1)
-            # Das sind geometrische Zufälle oder völlig neue Phänomene
-            isolierte_paare.append(comp.pop())
-            
-    return haupt_gruppen, rest_gruppen, isolierte_paare
