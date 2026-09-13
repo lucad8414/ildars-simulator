@@ -86,7 +86,7 @@ def split_dictionary_with_flags(data: dict):
         for i in range(len(value)): 
             for j in range(len(value)):
 
-                if i == j: continue
+                # if i == j: continue
 
                 # boolean, if they are reducable to each other, through some reflection sequence s
                 matches = matchings(value[i], value[j])

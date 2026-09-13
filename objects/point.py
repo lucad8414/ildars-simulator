@@ -82,3 +82,27 @@ class Point:
         """
         plt.scatter(self.value[0], self.value[1], s=30, color = color, label=name)
         plt.text(self.value[0], self.value[1], name, size=8, color="green")
+
+
+    def compute_image_point(sender: "Point", reflection_path, walls: list) -> "Point":
+        """
+        Rebuild the image point I_w directly from the sender and the
+        ordered list of wall labels in `reflection_path`, e.g. [2, 1, 3]
+        for the path you currently label "I213".
+    
+        This is the replacement for `pov()`'s reconstruction via
+        `distance + rad`. It uses only the wall mirror formula, so it
+        carries no dependence on the receiver radius at all.
+    
+        :param sender: the original sender position, as a Point
+        :param reflection_path: ordered list of wall indices, first
+            reflection first, exactly the order already encoded in your
+            path labels like "I213" -> [2, 1, 3]
+        :param walls: dict mapping a wall index (1, 2, 3) to its Line
+        :return: the exact image point I_w, as a Point
+        """
+        current = sender
+        for wall_index in reflection_path:
+            wall = walls[wall_index - 1]
+            current = wall.mirror(current)
+        return current

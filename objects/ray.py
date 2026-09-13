@@ -145,7 +145,7 @@ class Ray:
     
     # ------------------------------------------------------------------------
 
-    def pov(self, reciever: tuple[Point, float], color: str = "orange", name: str = "", labelling: bool = True) -> tuple[Vector, str]:
+    def pov(self, walls: list[Line], sender: Point, color: str = "orange", name: str = "", labelling: bool = True) -> tuple[Vector, str]:
         """
         Plotting every Point, where the reciever sees it, just using the incoming direction
         and the entire length of the ray for the plot.
@@ -158,23 +158,13 @@ class Ray:
         :param name: label
         :type name: str
         """
-        rec, rad = reciever
+
 
         # only continue if this ray was ever recieved        
         if not self.recieved:
             return None
-        
-        # entire distance of the ray
-        distance = sum(abs(value) for value in self.values)
 
-        # direction of intersection
-        pov_vec = Vector(rec, self.values[-1].anchor)
-
-        # normalized
-        npov = pov_vec.normalized()
-
-        # scaled
-        pov = npov.scalar(distance + rad)
+        virtual = Point.compute_image_point(sender, self.logger[:len(self.logger) - 1], walls)
 
         # adding the label:
         
@@ -183,10 +173,10 @@ class Ray:
             for reflection in self.logger:
                 label += str(reflection)
             label = label[:len(label) - 1]
+            # label="" # TOGGLE !!
+        virtual.plot(color, label)
         
-        pov.end.plot(color, label)
         
-        
-        return (pov, label)
+        return (virtual, label)
 
 

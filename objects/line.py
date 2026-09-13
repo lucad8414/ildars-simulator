@@ -330,3 +330,23 @@ class Line:
         plt.plot(xs, ys, color = color, label = name)
 
 
+    def mirror(self, point):
+        """
+        Exact Householder reflection of `point` across this wall.
+        No receiver radius, no ray length, only the wall's own
+        geometry and the point being reflected.
+        """
+        p = np.asarray(point.value, dtype=float)
+        a = np.asarray(self.anchor.value, dtype=float)
+        # 1  2 -> -2 1 
+        scaled = self.direction.normalized()
+        normal = [-scaled.value[1], scaled.value[0]]
+        n = np.asarray(normal, dtype=float)
+ 
+        offset = p - a
+        projection_length = np.dot(offset, n)
+        reflected = p - 2.0 * projection_length * n
+ 
+        return Point(list(reflected))
+
+
