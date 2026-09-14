@@ -11,7 +11,7 @@ import math
 
 
 
-ROUNDS = 20013 # Important HYPERPARAMETER, amount of Signals, which are send.
+ROUNDS = 20025 # Important HYPERPARAMETER, amount of Signals, which are send.
 
 
 class Engine:
@@ -42,9 +42,12 @@ class Engine:
         beta = rng.uniform(low=np.pi/6, high=(np.pi - alpha))
 
         # generate random starting point and line
-        base = Line(Point([-7.122, -16.432]), Vector(Point([0.,0.]), Point([20.891, -2.432]))) # 1
-        right = Line(Point([10.,15.]), Vector(Point([0.,0.]), Point([25.879, -41.891]))) # 2
-        left = Line(Point([-23.758, 0.453]), Vector(Point([0.,0.]), Point([4.499, 9.175]))) # 3
+        base = Line(Point([-27.818, 5.123]), Vector(Point([0.,0.]), Point([-1.766, 5.121]))) # 1
+        right = Line(Point([30.432,15.532]), Vector(Point([0.,0.]), Point([-18.782,-34.123]))) # 2
+        left = Line(Point([-2.809, 23.091]), Vector(Point([0.,0.]), Point([2.123, 0.217]))) # 3
+
+
+
 
         additional = Line(Point([17.,-1.]), Vector(Point([0.,0.]), Point([0., 10.])))
         self.walls = [base,right,left]
@@ -63,7 +66,9 @@ class Engine:
         while flag:
             flag = False
         
-        self.sender = Point([-3.123, 19.543])
+        self.sender = Point([-4.710, -16.993])
+
+
         # think of some bounds: how far from each other? how far from each wall at least?
 
 
@@ -195,13 +200,16 @@ if __name__ == "__main__":
         line += "]\n"
     # print("Rounded and formatted data", line)
 
-    e.compare_point_pair_distances(1)
+    e.compare_point_pair_distances(8)
     # print("Unfilted distance pairs", e.distance_pairs)
     # print()
+    Isolated = 0
     filtered_data = {}
     for key, value in e.distance_pairs.items():
         if len(value) > 1:
             filtered_data[key] = value
+        else:
+            Isolated += 1
 
     print("Macros:", ROUNDS, e.radius)
     # print("Filtered data", filtered_data)
@@ -213,17 +221,18 @@ if __name__ == "__main__":
     # because we know, that the keys match, we just go through the keys of one.
     maxi = 0
     mystery_count = 0
-
+    groupings = 0
+    multi_groups = []
     for key, value in rest.items():
-        print(f"Grouped point pairs: {clear[key]}.")
-        print(f"Unresolved point pairs: {value}.")
-        print(f"Matching inside the group: {logs[key]}.")
+        print(f"Groupe: {clear[key]}.")
+        print(f"Match: {logs[key]}.")
         if len(value) > 0:
             mystery_count += 1
          
         if len(clear[key]) > maxi:
             maxi = len(clear[key])
 
+        multi = False
         identities = [str(sorted(logs[key][0]))]
         for log in logs[key]:
             new_identity = True
@@ -233,14 +242,26 @@ if __name__ == "__main__":
                     break
 
             if new_identity:
+                multi = True
+                groupings += 1
+                print("################")
                 identities.append(str(sorted(log)))
+
+        if multi:
+            multi_groups.append(clear[key])
+            multi = False
 
         print(f"All the different isometries at this distance: {identities}")
 
 
+    print(f"Amount of Isolated pairs: {Isolated}")
+    print(f"Amount of Pairs: {len(e.distance_pairs)}")
+    print(f"Amount of Points: {len(e.images)}.")
+    print(f"Amount of multi groups: {groupings}.")
     print("Largest group:", maxi)
     print(f"Amount of differnt groups: {len(clear)}.")
     print(f"AMount of Groups, which have unanswerd elements: {mystery_count}.")
+    print(multi_groups)
 
 
     plt.autoscale(False)

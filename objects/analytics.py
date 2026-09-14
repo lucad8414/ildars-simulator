@@ -129,7 +129,7 @@ def split_dictionary_with_flags(data: dict):
 
 
 if __name__ == "__main__":
-    test = [('I2', 'I32121'), ('I32312', 'I1')]
+    test = [('I2132', 'I31'), ('I213', 'I312'), ('I21321', 'I3'), ('I231', 'I132'), ('I2312', 'I13'), ('I232', 'I21231'), ('I2321', 'I2123'), ('I32', 'I1231'), ('I3212', 'I1232'), ('I13213', 'I2')]
     for i in range(len(test)):
         for j in range(len(test)):
             if i == j: continue
